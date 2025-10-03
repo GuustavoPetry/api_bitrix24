@@ -2,8 +2,14 @@
 const BITRIX_DOMAIN = "";
 const WEBHOOK = "";
 const CATEGORY_ID = 27; // pipeline para buscar os negócios
-const FIRST_STAGE_ID = "C27:PREPAYMENT_INVOIC"; // ID da primeira etapa do pipeline
-const TARGET_STAGE_ID = "C27:NEW"; // ID do stage alvo
+const FIRST_STAGE_ID = "C27:NEW"; // ID da primeira etapa do pipeline
+const TARGET_STAGE_ID = "C27:PREPAYMENT_INVOIC"; // ID do stage alvo
+const cardMigrado = "UF_CRM_1759489566";
+const datahoraMigrate = "UF_CRM_1759489597";
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // --- FUNÇÃO PARA PEGAR TODOS OS NEGÓCIOS DE UMA CATEGORIA --- //
 async function getDeals(categoryId) {
@@ -47,7 +53,9 @@ async function updateDeal(dealId, newStageId) {
         body: JSON.stringify({
             id: dealId,
             fields: {
-                STAGE_ID: newStageId
+                STAGE_ID: newStageId,
+                [cardMigrado]: false,
+                [datahoraMigrate]: new Date().toISOString()
             }
         })
     });
@@ -72,6 +80,8 @@ async function migrateDeals() {
             } else {
                 console.log(`Negócio ${deal.ID} atualizado para STAGE_ID=${TARGET_STAGE_ID}`);
             }
+            await sleep(500);
+            console.log("Timer 500ms")
         }
 
         console.log("Atualização concluída!");
