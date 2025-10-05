@@ -2,12 +2,15 @@ const axios = require("axios");
 
 // Configurações
 const WEBHOOK_URL = "";
-const CATEGORY_ID = 27;
+const CATEGORY_ID = 10;
+const idCampoLista = "5946";
 
 // Campos personalizados
-const pipelineAnterior = "UF_CRM_1759489538";
-const etapaAnterior = "UF_CRM_1759425630";
-const dataFechamento = "UF_CRM_1759427112";
+const empresaGrupo = "UF_CRM_671F7094426CB";
+const pipelineAnterior = "UF_CRM_1759494167";
+const etapaAnterior = "UF_CRM_1759494178";
+const dataFechamento = "UF_CRM_1759494199";
+
 
 // Cache de títulos para não chamar API a cada card
 let pipelineCache = {};
@@ -74,11 +77,11 @@ async function updateDealField(dealId, closeDate, pipelineTitle, stageTitle) {
     fields: {
       [dataFechamento]: closeDate || "",    // pode gravar vazio se não tiver data
       [pipelineAnterior]: pipelineTitle,
-      [etapaAnterior]: stageTitle
+      [etapaAnterior]: stageTitle,
+      [empresaGrupo]: idCampoLista
     }
   });
 
-  console.log(`Negócio ${dealId} atualizado`);
 }
 
 // Função principal
@@ -87,17 +90,20 @@ async function run() {
     const deals = await getDealsByCategory(CATEGORY_ID);
     console.log(`Total de negócios encontrados: ${deals.length}`);
 
+    let i = 1;
     for (const deal of deals) {
       const pipelineTitle = await getPipelineTitle(deal.CATEGORY_ID);
       const stageTitle = await getStageTitle(deal.CATEGORY_ID, deal.STAGE_ID);
 
       await updateDealField(deal.ID, deal.CLOSEDATE, pipelineTitle, stageTitle);
-      await sleep(600);
-      console.log("Timer 500ms")
+      await sleep(700);
+      console.log(`Negócio ${deal.ID} atualizado | ${i} de ${deals.length}`);
+      ++i;
     }
   } catch (err) {
     console.error("Erro:", err.response ? err.response.data : err.message);
   }
+  console.log("Campos Atualizados com Sucesso")
 }
 
 run();
